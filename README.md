@@ -2,9 +2,13 @@
 
 本仓库是 **DELTARUNE Android 移植版**（`org.hndteam.deltarune`，8.5.0-CI）的中文本地化**文本与工具**。
 
+> **来源声明**：本项目的译文与贴图来自 **[好人汉化组](https://github.com/gm3dr/DeltaruneChinese)** 的
+> DELTARUNE 中文本地化补丁（CC BY-NC-SA 4.0），是非官方派生作品，详见下文「与好人汉化组的关系」。
+
 ## 协议 License
 
-翻译文本（`text/`）使用 **[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans)** 协议许可，
+本项目（翻译文本与修改后的贴图）使用
+**[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans)** 协议许可，
 与 **[好人汉化组](https://github.com/gm3dr/DeltaruneChinese)** 的 DELTARUNE 中文本地化补丁**采用同一协议**。
 
 - **署名 BY**：使用/修改请保留本仓库与好人汉化组的署名。
@@ -13,19 +17,24 @@
 
 本仓库对修改后的内容不承担任何责任。
 
-## 与好人汉化组的关系
+## 与好人汉化组的关系（来源说明）
 
-本项目的**译名体系参考了好人汉化组**的 DELTARUNE 中文本地化成果：人物名保留英文原名、物品/菜单/地名等
-专名沿用好人汉化组与 DELTARUNE 中文 Wiki 的既定译法，以保证玩家在两版汉化之间切换时观感一致。
+**本项目是好人汉化组 [DELTARUNE 中文本地化补丁](https://github.com/gm3dr/DeltaruneChinese) 的派生作品**，
+依照其 **CC BY-NC-SA 4.0** 协议使用，并在此**明确署名**。具体用了什么：
 
-**但 `text/` 下的译文不是抄自好人汉化组**。它的产生方式是：以移植版自带的俄文（及英文）文本为源，
-用 DeepSeek API 逐条做无上下文、无推理的同语意改写。逐条比对好人译文的完全一致率约 **12.6%**，
-且集中在人名、"是/否"这类短句上。
+| 内容 | 来源 | 说明 |
+| --- | --- | --- |
+| `text/` 下的中文译文 | 好人汉化组译文 | 以其译文为底，用 DeepSeek API 逐条做无上下文、无推理的同语意改写（逐条完全一致率约 12.6%，长句 ≥12 字仅 0.85%）。**是派生作品，不是独立翻译** |
+| 修改后的贴图 | 好人汉化组改图 | 直接导入 `data.win`（其仓库 `workspace/*/imports/pics`、`pics_zhname`），未作改动 |
+| 字体 | 本项目自行渲染 | 从 [Noto Sans CJK（思源黑体）](https://github.com/notofonts/noto-cjk) 渲染位图图集；渲染方式（字号、步进、基线）照其 `atlas_packer` 的做法实现 |
+| 音频 | **未使用** | 不含任何来自好人汉化组的音频 |
+| GML 代码 | 本项目自写 | 仅「导入逻辑」参考其打包器思路，未引入其 GML 改动 |
 
-特此说明，避免对来源产生误解。好人汉化组对第三方内容的授权决定权归其所有。
+译名体系（人物名保留英文原文、物品/菜单/地名依 DELTARUNE 中文 Wiki 与其既定译法）同样沿用其成果，
+以保证玩家在两版汉化之间切换时观感一致。
 
-> 本项目**不含**任何来自好人汉化组的贴图、音频或字体资源。字体是从
-> [Noto Sans CJK（思源黑体）](https://github.com/notofonts/noto-cjk) 自行渲染的位图图集。
+> **BY**：以任何形式分发本项目的文本或贴图，请保留本仓库与**好人汉化组**的署名，并注明是派生作品。
+> **NC**：不得用于商业用途。**SA**：修改后须以 CC BY-NC-SA 4.0 发布。
 
 ## 目录结构
 
@@ -74,7 +83,6 @@ tools/                      本地化工具链（下述）
 | `build_glyphs.py` | 用思源黑体渲染位图图集（字格、步进、基线、控制码全部由脚本量测） |
 | `rewrap.py` | 按引擎实际字宽重新排文本换行（引擎上限 = `charline × hspace`） |
 | `PatchHardcodedStrings.csx` | 替换 `data.win` / `game.droid` 里 STRG 块的硬编码字符串 |
-| `PatchCharline.csx` | 调整引擎换行宽度常数 |
 | `gml_zh_dy.gml` | 逐字符垂直偏移表（供渲染时使用） |
 
 工具依赖：[UndertaleModTool](https://github.com/UnderminersTeam/UndertaleModTool)（读写 `data.win`）、
@@ -86,11 +94,13 @@ Python 3 + Pillow、Noto Sans CJK。
   已一并汉化（见 `merged_ch0.json`、`merged_droid.json`）。
 - 移植版自带俄文的遗留部分（FAQ、免责声明、制作名单、调试提示、俄语格变化系统）已全部替换为中文；
   人名与团队名按惯例保留原文。
-- 字体图集的字格尺寸按引擎实际行为量测，非等比缩放。
+- 字体图集的字格尺寸按引擎实际行为量测，非等比缩放；字号表与好人汉化组 `fonts.cfg` 一致
+  （`fnt_main` 汉字步进 14 px），因此**无需**修改引擎换行常数，中英换行与原版补丁对齐。
 
 ## 感谢
 
-- **好人汉化组** —— DELTARUNE 中文本地化补丁，译名体系参考来源，本项目沿用其 CC BY-NC-SA 4.0 协议
+- **好人汉化组** —— DELTARUNE 中文本地化补丁；本项目的译文（经 DeepSeek 改写）与贴图均派生自其成果，
+  并沿用其 CC BY-NC-SA 4.0 协议
 - **Hopes&Dreams** —— DELTARUNE Android 移植版
 - **Toby Fox / Fangamer** —— DELTARUNE 原作
 - DELTARUNE 中文 Wiki —— 专名译法参考
