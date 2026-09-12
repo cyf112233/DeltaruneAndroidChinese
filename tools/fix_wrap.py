@@ -14,7 +14,7 @@ import json, os, re, shutil, sys
 W = "/media/cyf112233/data/deltarune/work"
 PC = "/media/cyf112233/data/steamgames/steamapps/common/DELTARUNE"
 LIMIT = 33 * 8          # 引擎换行宽度 = charline(33) × hspace(8)
-RESERVE = 18            # 续行前引擎自动补 "* "（约 18px）
+RESERVE = 16            # 续行前引擎自动补 "* "，引擎自己按 hspace*2 = 16px 算
 CTRL = re.compile(r"\\[A-Za-z][0-9]?|\^[0-9]+|~[0-9]?")
 # 终止符本身不占宽，但它前面的空格占宽（引擎照样计入），所以空格留在正文里
 TERM = re.compile(r"(?:/|%|%%|/%)(\s*)$")
@@ -84,9 +84,13 @@ def split_once(line, adv, limit, hard=False):
     return [a, b]
 
 
-def avail(i):
-    """第 i 行可用宽度：接在换行后面的行，引擎会先补 "* "，要留出位置"""
-    return LIMIT - (RESERVE if i > 0 else 0)
+def avail(i, has_aster=True):
+    """第 i 行可用宽度。
+
+    接在换行后面的行，引擎会先补 "* "（hspace*2 = 16px），所以要留位置；
+    但整条文本里没有 "*" 时 aster 一直是 0，引擎不会补，可用宽度就是满的 264。
+    """
+    return LIMIT - (RESERVE if (i > 0 and has_aster) else 0)
 
 
 def merge_at(parts, seps, i):
@@ -134,6 +138,7 @@ def main():
             gcore = gbody[len(lm_g):len(gbody) - len(tm_g)]
 
             # 只看"内层"行数：前后缀换行由 A 单独负责，别在这儿又被合并回去
+            has_aster = "*" in core
             parts, seps = parse(core)
             gparts = [x for x in SPLIT_RE.split(gcore) if x.strip() != ""]
             want = len(gparts)
@@ -154,7 +159,7 @@ def main():
                 done = False
                 for i in range(len(parts) - 1):
                     cand = parts[i] + parts[i + 1].lstrip(" ")
-                    if width(cand, adv) <= avail(i):
+                    if width(cand, adv) <= avail(i, has_aster):
                         parts, seps = merge_at(parts, seps, i)
                         done = True
                         break
@@ -169,7 +174,7 @@ def main():
             guard = 0
             while guard < 12:
                 guard += 1
-                wide = [i for i, l in enumerate(parts) if width(l, adv) > avail(i)]
+                wide = [i for i, l in enumerate(parts) if width(l, adv) > avail(i, has_aster)]
                 if not wide:
                     break
                 i = wide[0]
@@ -179,7 +184,7 @@ def main():
                     parts[i] = stripped
                     tally["C 行尾空格"] += 1
                     continue
-                r = cut_at(parts, seps, i, adv, avail(i), True)
+                r = cut_at(parts, seps, i, adv, avail(i, has_aster), True)
                 if not r:
                     tally["拆不动"] += 1
                     break
@@ -198,11 +203,12 @@ def main():
             if isinstance(g, str) and any("\u4e00" <= ch <= "\u9fff" for ch in g):
                 continue                      # 上面已经处理过
             body, term = split_term(v)
+            has_aster = "*" in body
             parts, seps = parse(body)
             guard = 0
             while guard < 12:
                 guard += 1
-                wide = [i for i, l in enumerate(parts) if width(l, adv) > avail(i)]
+                wide = [i for i, l in enumerate(parts) if width(l, adv) > avail(i, has_aster)]
                 if not wide:
                     break
                 i = wide[0]
@@ -211,7 +217,7 @@ def main():
                     parts[i] = stripped
                     tally["C 行尾空格"] += 1
                     continue
-                r = cut_at(parts, seps, i, adv, avail(i), True)
+                r = cut_at(parts, seps, i, adv, avail(i, has_aster), True)
                 if not r:
                     tally["拆不动"] += 1
                     break
